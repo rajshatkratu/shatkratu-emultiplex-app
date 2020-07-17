@@ -1,3 +1,4 @@
+using EMultiplex.API.Utils;
 using EMultiplex.DAL;
 using EMultiplex.Models.Options;
 using EMultiplex.Repositories;
@@ -112,6 +113,10 @@ namespace EMultiplex.API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseEmultiplexExceptionMiddleware();
             }
 
             app.UseHttpsRedirection();
