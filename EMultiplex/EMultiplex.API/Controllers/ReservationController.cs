@@ -1,6 +1,7 @@
 ﻿using EMultiplex.Models.Requests;
 using EMultiplex.Models.Responses;
 using EMultiplex.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Multiplex.Api.Repositories.Interfaces;
 using System;
@@ -21,10 +22,13 @@ namespace EMultiplex.API.Controllers
         {
             _reservationService = reservationService ?? throw new ArgumentNullException(nameof(reservationService));
         }
-
+        [Authorize]
         [HttpPost("create")]
         public async Task<IActionResult> CreateReservationAsync([FromBody] ReservationRequest request)
         {
+
+            request.UserId = HttpContext.User.Claims.SingleOrDefault(x => x.Type == "id").Value;
+
             var result = await _reservationService.CreateReservationAsync(request);
 
             if (!result.IsSuccess)

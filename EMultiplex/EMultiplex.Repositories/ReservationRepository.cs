@@ -19,23 +19,26 @@ namespace Multiplex.Api.Repositories.Implementations
 
         public async Task<(ReservationModel Reservation, bool IsSuccess, string ErrorMessage)> CreateReservationAsync(ReservationRequest request)
         {
-            var show = await Context.Shows.Include(x => x.Movie).Include(x => x.Movie).FirstOrDefaultAsync(x => x.Id == request.ShowId);
+            var show = await Context.Shows.Include(x=> x.Movie).Include(x=> x.Multiplex).ThenInclude(x=>x.City).FirstOrDefaultAsync(x => x.Id == request.ShowId);
 
 
             if (show == null)
-                return (null, false, "invalid show");
+                return (null, false, "Invalid show");
 
             if (!request.MovieName.Equals(show.Movie.Name, StringComparison.OrdinalIgnoreCase))
-                return (null, false, "invalid movie request for show");
+                return (null, false, "Invalid movie request for show");
 
-            if (!request.MovieName.Equals(show.Movie.Name, StringComparison.OrdinalIgnoreCase))
-                return (null, false, "invalid theater request for show");
+            if (!request.CityName.Equals(show.Multiplex.City.Name, StringComparison.OrdinalIgnoreCase))
+                return (null, false, "Invalid multiplex city request for show");
+
+            if (!request.MultiplexName.Equals(show.Multiplex.Name, StringComparison.OrdinalIgnoreCase))
+                return (null, false, "Invalid multiplex request for show");
 
             if (request.NoOfTickets > show.AvailableSeats)
-                return (null, false, "the no of requested sheats are not available to book");
+                return (null, false, "The no of requested sheats are not available to book");
 
             if ((request.ShowDate != show.ShowDate) && (request.ShowDate <= DateTime.UtcNow.AddDays(-1)))
-                return (null, false, "incorrect show date");
+                return (null, false, "Incorrect show date");
 
 
             var reservation = new Reservation
