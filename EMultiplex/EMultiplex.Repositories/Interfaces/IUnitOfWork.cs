@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Multiplex.Api.Repositories.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace EMultiplex.Repositories.Interfaces
     {
 
         IMovieRepository MovieRepository { get; }
+        IReservationRepository ReservationRepository { get; }
         Task<int> SaveAsync();
     }
 }

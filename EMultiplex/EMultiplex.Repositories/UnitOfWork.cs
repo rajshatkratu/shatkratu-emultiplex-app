@@ -1,6 +1,7 @@
 ﻿using EMultiplex.DAL;
 using EMultiplex.Repositories.Interfaces;
 using Multiplex.Api.Repositories.Implementations;
+using Multiplex.Api.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,11 +14,13 @@ namespace EMultiplex.Repositories
         private bool _disposed = false;
         private readonly EMultiplexDbContext _context;
         public IMovieRepository MovieRepository { get; private set; }
+        public IReservationRepository ReservationRepository { get; private set; }
 
         public UnitOfWork(EMultiplexDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            MovieRepository = new MovieRepository(context);
+            MovieRepository = new MovieRepository(_context);
+            ReservationRepository = new ReservationRepository(_context);
         }
 
         public async Task<int> SaveAsync()

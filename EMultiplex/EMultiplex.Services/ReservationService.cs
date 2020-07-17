@@ -1,5 +1,6 @@
 ﻿using EMultiplex.Models;
 using EMultiplex.Models.Requests;
+using EMultiplex.Repositories.Interfaces;
 using EMultiplex.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,21 @@ namespace EMultiplex.Services
 {
     public class ReservationService : IReservationService
     {
-        public Task<(ReservationModel reservation, bool IsSuccess, string ErrorMessage)> CreateReservationAsync(ReservationRequest request)
+        private readonly IUnitOfWork _unitOfWork;
+
+        public ReservationService(IUnitOfWork unitOfWork)
         {
-            throw new NotImplementedException();
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        }
+
+        public async Task<(ReservationModel Reservation, bool IsSuccess, string ErrorMessage)> CreateReservationAsync(ReservationRequest request)
+        {
+            var result = await _unitOfWork.ReservationRepository.CreateReservationAsync(request);
+
+            if (result.IsSuccess)
+                await _unitOfWork.SaveAsync();
+
+            return result;
         }
     }
 }

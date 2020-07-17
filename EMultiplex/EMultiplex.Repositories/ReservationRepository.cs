@@ -1,7 +1,12 @@
 ﻿using EMultiplex.DAL;
 using EMultiplex.DAL.Domain;
+using EMultiplex.Models;
+using EMultiplex.Models.Requests;
 using EMultiplex.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Multiplex.Api.Repositories.Interfaces;
+using System;
+using System.Threading.Tasks;
 
 namespace Multiplex.Api.Repositories.Implementations
 {
@@ -12,43 +17,58 @@ namespace Multiplex.Api.Repositories.Implementations
 
         }
 
-        //public (Reservation Result, bool IsSuccess, string ErrorResponse) CreateBooking(BookTicketRequest request)
-        //{
-
-        //    var show = _context.Shows.Include(x => x.Movie).Include(x=>x.Theater).FirstOrDefault(x => x.Id == request.ShowId);
-
-
-        //    if (show == null)
-        //        return (null, false, "Invalid show");
-
-        //    if(!request.MovieName.Equals(show.Movie.Name, StringComparison.OrdinalIgnoreCase))
-        //        return (null, false, "Invalid movie request for show");
-
-        //    if (!request.TheaterName.Equals(show.Theater.Name, StringComparison.OrdinalIgnoreCase))
-        //        return (null, false, "Invalid theater request for show");
-
-        //    if (request.NoOfTickets > show.AvailableSeats)
-        //        return (null, false, "The no of requested sheats are not available to book");
-
-        //    if ((request.ShowDate != show.ShowDate) && (request.ShowDate <= DateTime.UtcNow.AddDays(-1)))
-        //        return (null, false, "Incorrect show date");
+        public async Task<(ReservationModel Reservation, bool IsSuccess, string ErrorMessage)> CreateReservationAsync(ReservationRequest request)
+        {
+            var show = await Context.Shows.Include(x => x.Movie).Include(x => x.Movie).FirstOrDefaultAsync(x => x.Id == request.ShowId);
 
 
-        //    var reservation = new Reservation
-        //    {
-        //        MaxSeatPerBooking = 5,
-        //        BookingDate = show.ShowDate,
-        //        NumberOfSeatBooked = request.NoOfTickets,
-        //        ShowId = show.Id,
-        //        PriceOfBooking = show.PricePerSeat * request.NoOfTickets,
-        //        UserId = request.UserId
-        //    };
+            if (show == null)
+                return (null, false, "invalid show");
 
-        //    base.Add(reservation);
-        //    show.AvailableSeats = show.AvailableSeats - request.NoOfTickets;
-        //    _context.Shows.Update(show);
+            if (!request.MovieName.Equals(show.Movie.Name, StringComparison.OrdinalIgnoreCase))
+                return (null, false, "invalid movie request for show");
 
-        //    return (reservation, true, null);
-        //}
+            if (!request.MovieName.Equals(show.Movie.Name, StringComparison.OrdinalIgnoreCase))
+                return (null, false, "invalid theater request for show");
+
+            if (request.NoOfTickets > show.AvailableSeats)
+                return (null, false, "the no of requested sheats are not available to book");
+
+            if ((request.ShowDate != show.ShowDate) && (request.ShowDate <= DateTime.UtcNow.AddDays(-1)))
+                return (null, false, "incorrect show date");
+
+
+            var reservation = new Reservation
+            {
+                MaxSeatPerBooking = 5,
+                BookingDate = DateTime.UtcNow,
+                NumberOfSeatBooked = request.NoOfTickets,
+                ShowId = show.Id,
+                PriceOfBooking = show.PricePerSeat * request.NoOfTickets,
+                UserId = request.UserId
+            };
+
+            await AddAsync(reservation);
+            show.AvailableSeats = show.AvailableSeats - request.NoOfTickets;
+            Context.Shows.Update(show);
+
+            ReservationModel model = GetReservationModel(reservation);
+
+            return (model, true, null);
+        }
+
+        private ReservationModel GetReservationModel(Reservation reservation)
+        {
+            return new ReservationModel
+            {
+                Id = reservation.Id,
+                ShowId = reservation.ShowId,
+                UserId = reservation.UserId,
+                PriceOfBooking = reservation.PriceOfBooking,
+                MaxSeatPerBooking = reservation.MaxSeatPerBooking,
+                BookingDate = reservation.BookingDate,
+                NumberOfSeatBooked = reservation.NumberOfSeatBooked
+            };
+        }
     }
 }

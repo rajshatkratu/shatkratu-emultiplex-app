@@ -10,6 +10,6 @@ namespace EMultiplex.Services.Interfaces
 {
     public interface IReservationService
     {
-        Task<(ReservationModel reservation, bool IsSuccess, string ErrorMessage)> CreateReservationAsync(ReservationRequest request);
+        Task<(ReservationModel Reservation, bool IsSuccess, string ErrorMessage)> CreateReservationAsync(ReservationRequest request);
     }
 }

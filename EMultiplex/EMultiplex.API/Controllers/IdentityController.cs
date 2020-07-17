@@ -1,4 +1,5 @@
-﻿using EMultiplex.Models.Requests;
+﻿using EMultiplex.Common.Constants;
+using EMultiplex.Models.Requests;
 using EMultiplex.Models.Responses;
 using EMultiplex.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -31,7 +32,7 @@ namespace EMultiplex.Api.Identity.Controllers
             {
                 return BadRequest(new AuthFailedResponse
                 {
-                    Errors = new[] { "Error occurred" }
+                    Errors = new[] { EMultiplexConstants.ErrorOccured }
                 });
             }
             return Ok(new AuthSuccessResponse
@@ -51,7 +52,7 @@ namespace EMultiplex.Api.Identity.Controllers
             {
                 return BadRequest(new AuthFailedResponse
                 {
-                    Errors = new[] { "Error occurred" }
+                    Errors = new[] { EMultiplexConstants.ErrorOccured}
                 });
             }
             return Ok(new AuthSuccessResponse
@@ -72,7 +73,7 @@ namespace EMultiplex.Api.Identity.Controllers
             {
                 return BadRequest(new AuthFailedResponse
                 {
-                    Errors = new[] { "Error occurred" }
+                    Errors = new[] { EMultiplexConstants.ErrorOccured }
                 });
             }
             return Ok(new AuthSuccessResponse
@@ -93,7 +94,7 @@ namespace EMultiplex.Api.Identity.Controllers
             {
                 return BadRequest(new AuthFailedResponse
                 {
-                    Errors = new[] { "Error occurred" }
+                    Errors = new[] { EMultiplexConstants.ErrorOccured }
                 });
             }
             return Ok(result.IsSuccess);
@@ -110,7 +111,7 @@ namespace EMultiplex.Api.Identity.Controllers
             {
                 return BadRequest(new AuthFailedResponse
                 {
-                    Errors = new[] { "Error occurred" }
+                    Errors = new[] { EMultiplexConstants.ErrorOccured}
                 });
             }
             return Ok(result.IsSuccess);

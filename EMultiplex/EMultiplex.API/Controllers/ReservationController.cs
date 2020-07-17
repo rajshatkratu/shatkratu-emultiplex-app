@@ -22,7 +22,7 @@ namespace EMultiplex.API.Controllers
             _reservationService = reservationService ?? throw new ArgumentNullException(nameof(reservationService));
         }
 
-        [HttpPost("api/book")]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateReservationAsync([FromBody] ReservationRequest request)
         {
             var result = await _reservationService.CreateReservationAsync(request);
@@ -35,7 +35,7 @@ namespace EMultiplex.API.Controllers
                         Errors = new[] { result.ErrorMessage ?? "Error occured while updating the record." }
                     });
             }
-            return Ok(result.reservation);
+            return Ok(result.Reservation);
         }
     }
 }

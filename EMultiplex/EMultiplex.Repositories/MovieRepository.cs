@@ -1,11 +1,15 @@
 ﻿using EMultiplex.Common.Constants;
 using EMultiplex.DAL;
 using EMultiplex.DAL.Domain;
+using EMultiplex.Models;
 using EMultiplex.Models.Requests;
 using EMultiplex.Models.Responses;
 using EMultiplex.Repositories;
 using EMultiplex.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Query.ExpressionTranslators;
+using Multiplex.Api.Contracts.Requests;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,7 +26,7 @@ namespace Multiplex.Api.Repositories.Implementations
         {
         }
 
-        public async Task<(Movie response, bool IsSuccess, string ErrorMessage)> CreateMovieAsync(MovieCreateRequest request)
+        public async Task<(MovieModel Result, bool IsSuccess, string ErrorMessage)> CreateMovieAsync(MovieCreateRequest request)
         {
             var genre = Context.Genres.FirstOrDefault(x => x.Name.Equals(request.Genre, StringComparison.OrdinalIgnoreCase));
 
@@ -42,11 +46,22 @@ namespace Multiplex.Api.Repositories.Implementations
             };
 
             await AddAsync(movie);
-
-            return (movie, true, null);
+            MovieModel model = GetMovieModel(movie);
+            return (model, true, null);
         }
 
-        public async Task<IEnumerable<MovieSearchResponse>> GetMoviesAsync(string city, string genre, string language)
+        private MovieModel GetMovieModel(Movie movie)
+        {
+            return new MovieModel
+            {
+                Id = movie.Id,
+                Name = movie.Name,
+                GenreId = movie.GenreId,
+                LanguageId = movie.LanguageId
+            };
+        }
+
+        public async Task<(IEnumerable<MovieSearchResponse> Result, bool IsSuccess, string ErrorMessage)> GetMoviesAsync(MovieSearchRequest request)
         {
             Func<string, string, bool> predicate = (x, y) =>
             {
@@ -61,8 +76,8 @@ namespace Multiplex.Api.Repositories.Implementations
                          join s in Context.Shows on m.Id equals s.MovieId
                          join ml in Context.Multiplexes  on s.MultiplexId equals ml.Id
                          join c in Context.Cities on ml.CityId equals c.Id
-                         where predicate(g.Name, genre) && predicate(l.Name, language) && predicate(c.Name, city)
-                         select new 
+                         where predicate(g.Name, request.Genre) && predicate(l.Name, request.Language) && predicate(c.Name, request.City)
+                         select new
                          {
                              MovieId = m.Id,
                              MovieName = m.Name,
@@ -74,20 +89,20 @@ namespace Multiplex.Api.Repositories.Implementations
                              MultiplexName = ml.Name,
                              City = c.Name,
                              ShowId = s.Id
-                         }).Distinct().ToListAsync();
+                         }).Distinct().Select(x=> new MovieSearchResponse {
+                             MovieId = x.MovieId,
+                             MovieName = x.MovieName,
+                             Genre = x.Genre,
+                             Language = x.Language,
+                             ShowDate = x.ShowDate,
+                             PricePerSeat = x.PricePerSeat,
+                             MultiplexId = x.MultiplexId,
+                             MultiplexName = x.MultiplexName,
+                             City = x.City,
+                             ShowId = x.ShowId
+                         }).ToListAsync();
 
-            return movies.Select(x=> new MovieSearchResponse{
-                MovieId = x.MovieId,
-                MovieName = x.MovieName,
-                Genre = x.Genre,
-                Language = x.Language,
-                ShowDate = x.ShowDate,
-                PricePerSeat = x.PricePerSeat,
-                MultiplexId = x.MultiplexId,
-                MultiplexName = x.MultiplexName,
-                City = x.City,
-                ShowId= x.ShowId
-            });
+            return (movies, true, null);
         }
     }
 }
